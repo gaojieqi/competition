@@ -44,37 +44,67 @@ def get_training_data(training_data_directory,digit_file):
 
 
 
-def conv2d(x, W):
-    return tf.nn.conv2d(x, W, strides=[1,1,1,1], padding='SAME')
-
-def maxpool2d(x):
-    return tf.nn.max_pool(x, ksize=[1,2,2,1], strides=[1,2,2,1], padding='SAME')
-
-def convolutional_neural_network(x):
-    weights={'W_conv1':tf.Variable(tf.random_normal([5,5,1,10])),
-            'W_conv2':tf.Variable(tf.random_normal([5,5,10,10])),
-             'W_fc':tf.Variable(tf.random_normal([7*7*10,10])),
-             'out': tf.Variable(tf.random_normal([10, n_classes]))
-             }
-
-    biases = {'b_conv1': tf.Variable(tf.random_normal([10])),
-               'b_conv2': tf.Variable(tf.random_normal([10])),
-               'b_fc': tf.Variable(tf.random_normal([10])),
-               'out': tf.Variable(tf.random_normal([n_classes]))
-               }
-    x=tf.reshape(x, shape=[-1,28,28,1])
-    conv1=conv2d(x, weights['W_conv1'])+biases['b_conv1']
-    conv1=maxpool2d(conv1)
-    conv2 = conv2d(conv1, weights['W_conv2'])+biases['b_conv2']
-    conv2 = maxpool2d(conv2)
-    fc=tf.reshape(conv2,[-1,7*7*10])
-    print
-    fc=tf.nn.relu(tf.matmul(fc,weights['W_fc']+biases['b_fc']))
-    fc=tf.nn.dropout(fc, keep_rate)
-    output=tf.matmul(fc, weights['out']+biases['out'])
-    return output
 
 
+'''define training files path'''
+digit_file="./training/label.idl"
+training_data_directory="./training/"
+
+
+'''
+                                                Notice:
+traning data(features are variant for each i) such as training_data[i] is type of numpy.array, so you can show image with :
+----cv2.imshow(training_data[0])-----
+or write to file :
+----cv2.imwrite("test.jpg",training_data[0])---- 
+'''
+training_data, labels = get_training_data(training_data_directory, digit_file)# extract object  for training
+
+
+
+
+
+
+
+
+
+
+
+
+'''standard convolutional_neural_network model with out back-propagation(not in use)'''
+
+#
+# def conv2d(x, W):
+#     return tf.nn.conv2d(x, W, strides=[1,1,1,1], padding='SAME')
+#
+# def maxpool2d(x):
+#     return tf.nn.max_pool(x, ksize=[1,2,2,1], strides=[1,2,2,1], padding='SAME')
+#
+# def convolutional_neural_network(x):
+#     weights={'W_conv1':tf.Variable(tf.random_normal([5,5,1,10])),
+#             'W_conv2':tf.Variable(tf.random_normal([5,5,10,10])),
+#              'W_fc':tf.Variable(tf.random_normal([7*7*10,10])),
+#              'out': tf.Variable(tf.random_normal([10, n_classes]))
+#              }
+#
+#     biases = {'b_conv1': tf.Variable(tf.random_normal([10])),
+#                'b_conv2': tf.Variable(tf.random_normal([10])),
+#                'b_fc': tf.Variable(tf.random_normal([10])),
+#                'out': tf.Variable(tf.random_normal([n_classes]))
+#                }
+#     x=tf.reshape(x, shape=[-1,28,28,1])
+#     conv1=conv2d(x, weights['W_conv1'])+biases['b_conv1']
+#     conv1=maxpool2d(conv1)
+#     conv2 = conv2d(conv1, weights['W_conv2'])+biases['b_conv2']
+#     conv2 = maxpool2d(conv2)
+#     fc=tf.reshape(conv2,[-1,7*7*10])
+#     print
+#     fc=tf.nn.relu(tf.matmul(fc,weights['W_fc']+biases['b_fc']))
+#     fc=tf.nn.dropout(fc, keep_rate)
+#     output=tf.matmul(fc, weights['out']+biases['out'])
+#     return output
+#
+#
 # mnist= input_data.read_data_sets("/tmp/data/",one_hot=True)
 # sess=tf.InteractiveSession()
 # n_nodes_hl1=500
@@ -108,19 +138,14 @@ def convolutional_neural_network(x):
 # print sess.run(accuracy, {x: mnist.test.images, y: mnist.test.labels})
 # saver=tf.train.Saver()
 # saver.save(sess,'Convvolutional_Neural_Network.model')
-
-#-------------------load model-------------
+#
+# -------------------load model-------------
 # saver=tf.train.Saver()
 # saver.restore(sess,'Neural_Network.model')
 
 
 
-'''define training files path'''
-digit_file="./training/label.idl"
-training_data_directory="./training/"
 
-'''OBJECT=>traning data;CLASS=>labels'''
-OBJECT, CLASS = get_training_data(training_data_directory, digit_file)
 
 
 
