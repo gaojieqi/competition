@@ -33,10 +33,6 @@ def get_training_data(training_data_directory,digit_file):
                         y2 = int(object_of_image[2])
                         '''capture the object from image'''
                         object.append(img[x1:x2, y1:y2])
-                        ######test the capture performance##########
-                        # cv2.imshow(file, object[0])
-                        # print x1, x2, y1, y2
-                        # cv2.waitKey(0)
                         classes.append(object_of_image[4])
                     break
     print type(object[0])
@@ -56,7 +52,7 @@ training_data_directory="./training/"
 traning data(features are variant for each i) such as training_data[i] is type of numpy.array, so you can show image with :
 ----cv2.imshow(training_data[0])-----
 or write to file :
-----cv2.imwrite("test.jpg",training_data[0])---- 
+----cv2.imwrite("test.jpg",training_data[0])----
 '''
 training_data, labels = get_training_data(training_data_directory, digit_file)# extract object  for training
 
