@@ -1,20 +1,60 @@
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
+import json
+import cv2
+import simplejson as simplejson
+import os.path
+import os
+import numpy as np
+
+def get_training_data(training_data_directory,digit_file):
+    result = []
+    tweets = []
+    index_of_image = 0
+    for line in open(digit_file, 'r'):
+        tweets.append(json.loads(line))
+    for coordinate in tweets:
+        str = simplejson.dumps(coordinate)
+        result.append(0)
+        result[index_of_image] = json.loads(str)
+        index_of_image += 1
+    object = classes = []
+    for parent, dirnames, filenames in os.walk(training_data_directory):
+        for file in filenames:
+            img = cv2.imread(training_data_directory + file)
+            for every_image in result:
+                keys = every_image.keys()[0]
+                if keys in file:
+                    for object_of_image in every_image[keys]:
+                        '''respect coordination of the object'''
+                        x1 = int(object_of_image[1])
+                        y1 = int(object_of_image[0])
+                        x2 = int(object_of_image[3])
+                        y2 = int(object_of_image[2])
+                        '''capture the object from image'''
+                        object.append(img[x1:x2, y1:y2])
+                        ######test the capture performance##########
+                        # cv2.imshow(file, object[0])
+                        # print x1, x2, y1, y2
+                        # cv2.waitKey(0)
+                        classes.append(object_of_image[4])
+                    break
+    print type(object[0])
+    return object, classes
 
 
-def conv2d(x,W):
 
-    return tf.nn.conv2d(x,W,strides=[1,1,1,1],padding='SAME')
+def conv2d(x, W):
+    return tf.nn.conv2d(x, W, strides=[1,1,1,1], padding='SAME')
 
 def maxpool2d(x):
-
-    return tf.nn.max_pool(x,ksize=[1,2,2,1],strides=[1,2,2,1],padding='SAME')
+    return tf.nn.max_pool(x, ksize=[1,2,2,1], strides=[1,2,2,1], padding='SAME')
 
 def convolutional_neural_network(x):
     weights={'W_conv1':tf.Variable(tf.random_normal([5,5,1,10])),
             'W_conv2':tf.Variable(tf.random_normal([5,5,10,10])),
              'W_fc':tf.Variable(tf.random_normal([7*7*10,10])),
-             'out': tf.Variable(tf.random_normal([10,n_classes]))
+             'out': tf.Variable(tf.random_normal([10, n_classes]))
              }
 
     biases = {'b_conv1': tf.Variable(tf.random_normal([10])),
@@ -22,58 +62,65 @@ def convolutional_neural_network(x):
                'b_fc': tf.Variable(tf.random_normal([10])),
                'out': tf.Variable(tf.random_normal([n_classes]))
                }
-    x=tf.reshape(x,shape=[-1,28,28,1])
-    conv1=conv2d(x,weights['W_conv1'])+biases['b_conv1']
+    x=tf.reshape(x, shape=[-1,28,28,1])
+    conv1=conv2d(x, weights['W_conv1'])+biases['b_conv1']
     conv1=maxpool2d(conv1)
     conv2 = conv2d(conv1, weights['W_conv2'])+biases['b_conv2']
     conv2 = maxpool2d(conv2)
     fc=tf.reshape(conv2,[-1,7*7*10])
     print
     fc=tf.nn.relu(tf.matmul(fc,weights['W_fc']+biases['b_fc']))
-    fc=tf.nn.dropout(fc,keep_rate)
-    output=tf.matmul(fc,weights['out']+biases['out'])
+    fc=tf.nn.dropout(fc, keep_rate)
+    output=tf.matmul(fc, weights['out']+biases['out'])
     return output
 
 
-
-mnist= input_data.read_data_sets("/tmp/data/",one_hot=True)
-sess=tf.InteractiveSession()
-n_nodes_hl1=500
-n_nodes_hl2=500
-n_nodes_hl3=500
-n_classes=10
-batch_size=100
-feature_num=784
-x=tf.placeholder('float',[None,feature_num])
-y=tf.placeholder('float')
-keep_rate= 0.8
-keep_prob=tf.placeholder(tf.float32)
-hm_epochs = 10
-
-prediction = convolutional_neural_network(x)
-cost=tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction,Y))
-optimizer=tf.train.AdamOptimizer().minimize(cost)
-hm_epochs=30
-# -------------------save model-------------
-sess.run(tf.initialize_all_variables())
-for epoch in range(hm_epochs):
-    epoch_loss = 0
-    for _ in range(int(mnist.train.num_examples / batch_size)):
-        epoch_x, epoch_y = mnist.train.next_batch(batch_size)
-        _, c = sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
-        epoch_loss += c
-    print('Epoch', epoch, 'completed out of', hm_epochs, 'loss:', epoch_loss)
-
-correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
-accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-print sess.run(accuracy, {x: mnist.test.images, y: mnist.test.labels})
-saver=tf.train.Saver()
-saver.save(sess,'Convvolutional_Neural_Network.model')
+# mnist= input_data.read_data_sets("/tmp/data/",one_hot=True)
+# sess=tf.InteractiveSession()
+# n_nodes_hl1=500
+# n_nodes_hl2=500
+# n_nodes_hl3=500
+# n_classes=10
+# batch_size=100
+# feature_num=784
+# x=tf.placeholder('float',[None,feature_num])
+# y=tf.placeholder('float')
+# keep_rate= 0.8
+# keep_prob=tf.placeholder(tf.float32)
+# hm_epochs = 10
+#
+# prediction = convolutional_neural_network(x)
+# cost=tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction,Y))
+# optimizer=tf.train.AdamOptimizer().minimize(cost)
+# hm_epochs=30
+# # -------------------save model-------------
+# sess.run(tf.initialize_all_variables())
+# for epoch in range(hm_epochs):
+#     epoch_loss = 0
+#     for _ in range(int(mnist.train.num_examples / batch_size)):
+#         epoch_x, epoch_y = mnist.train.next_batch(batch_size)
+#         _, c = sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
+#         epoch_loss += c
+#     print('Epoch', epoch, 'completed out of', hm_epochs, 'loss:', epoch_loss)
+#
+# correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
+# accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+# print sess.run(accuracy, {x: mnist.test.images, y: mnist.test.labels})
+# saver=tf.train.Saver()
+# saver.save(sess,'Convvolutional_Neural_Network.model')
 
 #-------------------load model-------------
 # saver=tf.train.Saver()
 # saver.restore(sess,'Neural_Network.model')
 
+
+
+'''define training files path'''
+digit_file="./training/label.idl"
+training_data_directory="./training/"
+
+'''OBJECT=>traning data;CLASS=>labels'''
+OBJECT, CLASS = get_training_data(training_data_directory, digit_file)
 
 
 
